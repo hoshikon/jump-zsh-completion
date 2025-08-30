@@ -10,3 +10,11 @@ cd jump-zsh-completion
 ./autocomp-setup.sh
 ```
 
+## Uninstall
+To remove the jump command:
+```zsh
+./autocomp-uninstall.sh
+```
+
+Then manually remove the environment variables from your `.zshrc`.
+
