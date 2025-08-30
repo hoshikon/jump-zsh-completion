@@ -8,14 +8,15 @@ _jump() {
         return 1
     fi
     
-    # Check if config file exists and is readable
-    if [[ -z "$JUMP_COMP_CONFIG_PATH" || ! -f "$JUMP_COMP_CONFIG_PATH" ]]; then
+    # Use standard config location
+    local config_path="$HOME/.jump-completion/config.json"
+    if [[ ! -f "$config_path" ]]; then
         return 1
     fi
     
     # Validate JSON and read config
     local json
-    if ! json=$(cat "$JUMP_COMP_CONFIG_PATH" 2>/dev/null) || ! jq empty <<< "$json" 2>/dev/null; then
+    if ! json=$(cat "$config_path" 2>/dev/null) || ! jq empty <<< "$json" 2>/dev/null; then
         return 1
     fi
     

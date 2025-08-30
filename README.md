@@ -1,14 +1,13 @@
 # jump-zsh-completion
-JSON driven oh-my-zsh auto completion
+JSON driven zsh auto completion
 
 ## Set up
-Set env var `JUMP_COMP_CONFIG_PATH` to where the config file is.
-
-Then run:
 ```zsh
 cd jump-zsh-completion
 ./autocomp-setup.sh
 ```
+
+This will create a config file at `~/.jump-completion/config.json` that you can customize with your own commands.
 
 ## Uninstall
 To remove the jump command:
@@ -16,5 +15,5 @@ To remove the jump command:
 ./autocomp-uninstall.sh
 ```
 
-Then manually remove the environment variables from your `.zshrc`.
+Then manually remove the PATH entry from your `.zshrc`.
 

@@ -18,7 +18,7 @@ reset=$(tput sgr0)
 # Show help if requested
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
     echo "Usage: jump <command> [subcommand...]"
-    echo "Commands are defined in: ${JUMP_COMP_CONFIG_PATH:-'<JUMP_COMP_CONFIG_PATH not set>'}"
+    echo "Commands are defined in: ~/.jump-completion/config.json"
     exit 0
 fi
 
@@ -28,26 +28,24 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
-# Validate environment
-if [[ -z "$JUMP_COMP_CONFIG_PATH" ]]; then
-    echo "${red}Error: JUMP_COMP_CONFIG_PATH not set${reset}"
-    exit 1
-fi
+# Use standard config location
+CONFIG_PATH="$HOME/.jump-completion/config.json"
 
-if [[ ! -f "$JUMP_COMP_CONFIG_PATH" ]]; then
-    echo "${red}Error: Config file not found: $JUMP_COMP_CONFIG_PATH${reset}"
+if [[ ! -f "$CONFIG_PATH" ]]; then
+    echo "${red}Error: Config file not found: $CONFIG_PATH${reset}"
+    echo "Run './autocomp-setup.sh' to create a default configuration"
     exit 1
 fi
 
 # Validate JSON format
-if ! jq empty "$JUMP_COMP_CONFIG_PATH" 2>/dev/null; then
+if ! jq empty "$CONFIG_PATH" 2>/dev/null; then
     echo "${red}Error: Invalid JSON in config file${reset}"
     exit 1
 fi
 
 # Parse command from JSON config
 json_path=$(printf ".%s" "$@")
-command=$(jq -r "$json_path | if type==\"string\" then . else \"\" end" "$JUMP_COMP_CONFIG_PATH" 2> /dev/null)
+command=$(jq -r "$json_path | if type==\"string\" then . else \"\" end" "$CONFIG_PATH" 2> /dev/null)
 
 if [[ "$command" == "" ]]; then
     echo "${red}Invalid arguments: [$@]${reset}"
