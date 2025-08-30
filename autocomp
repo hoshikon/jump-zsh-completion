@@ -1,17 +1,57 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
-red=`tput setaf 1`
-green=`tput setaf 2`
-yellow=`tput setaf 3`
-reset=`tput sgr0`
+set -euo pipefail
+
+# Load oh-my-zsh aliases that users expect (like ll, la, etc.)
+if [[ -d ~/.oh-my-zsh ]]; then
+    [[ -f ~/.oh-my-zsh/lib/directories.zsh ]] && source ~/.oh-my-zsh/lib/directories.zsh 2>/dev/null || true
+fi
+
+# Load user's custom aliases
+[[ -f ~/.aliases ]] && source ~/.aliases 2>/dev/null || true
+
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+reset=$(tput sgr0)
+
+# Show help if requested
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    echo "Usage: jump <command> [subcommand...]"
+    echo "Commands are defined in: ${JUMP_COMP_CONFIG_PATH:-'<JUMP_COMP_CONFIG_PATH not set>'}"
+    exit 0
+fi
+
+# Check if jq is available
+if ! command -v jq &> /dev/null; then
+    echo "${red}Error: jq is required but not installed${reset}"
+    exit 1
+fi
+
+# Validate environment
+if [[ -z "$JUMP_COMP_CONFIG_PATH" ]]; then
+    echo "${red}Error: JUMP_COMP_CONFIG_PATH not set${reset}"
+    exit 1
+fi
+
+if [[ ! -f "$JUMP_COMP_CONFIG_PATH" ]]; then
+    echo "${red}Error: Config file not found: $JUMP_COMP_CONFIG_PATH${reset}"
+    exit 1
+fi
+
+# Validate JSON format
+if ! jq empty "$JUMP_COMP_CONFIG_PATH" 2>/dev/null; then
+    echo "${red}Error: Invalid JSON in config file${reset}"
+    exit 1
+fi
+
+# Parse command from JSON config
 json_path=$(printf ".%s" "$@")
-command=$(jq -r "$json_path | if type==\"string\" then . else \"\" end" $JUMP_COMP_CONFIG_PATH 2> /dev/null)
+command=$(jq -r "$json_path | if type==\"string\" then . else \"\" end" "$JUMP_COMP_CONFIG_PATH" 2> /dev/null)
 
 if [[ "$command" == "" ]]; then
     echo "${red}Invalid arguments: [$@]${reset}"
     exit 1
-else
-    echo "running ${green}\"$command\"${reset}
-    "
 fi
-eval $command
+
+eval "$command"
