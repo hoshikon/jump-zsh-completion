@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+yellow=`tput setaf 3`
+reset=`tput sgr0`
+json_path=$(printf ".%s" "$@")
+command=$(jq -r "$json_path | if type==\"string\" then . else \"\" end" $JUMP_COMP_CONFIG_PATH 2> /dev/null)
+
+if [[ "$command" == "" ]]; then
+    echo "${red}Invalid arguments: [$@]${reset}"
+    exit 1
+else
+    echo "running ${green}\"$command\"${reset}
+    "
+fi
+eval $command
